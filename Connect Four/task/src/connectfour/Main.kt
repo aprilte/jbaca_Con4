@@ -1,20 +1,65 @@
 package connectfour
 
 fun main() {
-    val Conf = Con4()
+    val conf = Con4()
+    conf.matchController()
 }
+
 
 class Con4() {
     var playerA = "playerA"
     var playerB = "playerB"
     var row = 6
     var col = 7
+    var turn = 0
 
     init {
         initialiser()
         var field = Array(row, {Array(col, {0})})
         println("$playerA vs $playerB")
         println("$row X $col board")
+        printField()
+    }
+
+    fun matchController() {
+        while(match()){}
+    }
+
+    fun match(): Boolean {
+        var continuation = true
+        if (turn % 2 == 0) {
+            println("${playerA}'s turn")
+        } else {
+            println("${playerB}'s turn")
+        }
+        var sts = 0
+        while (sts == 0) {
+            sts = getItsTurn()
+            if (0 < sts) {
+               TODO("invoke function: putHand(0 or 1: o or *)")
+            } else {
+                continuation = false
+            }
+        }
+
+        return continuation
+    }
+
+    fun getItsTurn(): Int{
+        val input = readln()
+        if(input == "end") {
+            println("Game over!")
+            return -1
+        }
+        try {
+            val inputcol = input.toInt()
+            if( inputcol in 1..this.col ) return inputcol
+        } catch (ex: Exception) {
+            println("Invalid Input")
+            return 0
+        }
+        println("The column number is out of range (1 - ${this.col})")
+        return 0
     }
 
     fun initialiser() {
@@ -45,4 +90,24 @@ class Con4() {
         return continuation
     }
 
+    fun printField() {
+        //print index
+        repeat(this.col){print(" ${it+1}")}
+        println()
+        //boxes
+        for (i in 0..(this.row - 1)) {
+            for (j in 0..this.col) {
+                print(
+                    if(j < this.col) {
+                        "| "
+                    } else {
+                        "|"
+                    }
+                )
+            }
+            println()
+        }
+        //end of field
+        println("=".repeat(this.col * 2 + 1))
+    }
 }
