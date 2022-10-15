@@ -12,10 +12,10 @@ class Con4() {
     var row = 6
     var col = 7
     var turn = 0
+    var field = Array(10, {Array(10, {0})})
 
     init {
         initialiser()
-        var field = Array(row, {Array(col, {0})})
         println("$playerA vs $playerB")
         println("$row X $col board")
         printField()
@@ -27,22 +27,52 @@ class Con4() {
 
     fun match(): Boolean {
         var continuation = true
-        if (turn % 2 == 0) {
-            println("${playerA}'s turn")
-        } else {
-            println("${playerB}'s turn")
-        }
-        var sts = 0
-        while (sts == 0) {
-            sts = getItsTurn()
-            if (0 < sts) {
-               TODO("invoke function: putHand(0 or 1: o or *)")
+        var inputCol = 0
+
+        while (inputCol == 0) {
+            if (turn % 2 == 0) {
+                println("${playerA}'s turn")
+            } else {
+                println("${playerB}'s turn")
+            }
+
+            inputCol = getItsTurn()
+            if (0 < inputCol) {
+                putHand(turn, inputCol)
             } else {
                 continuation = false
             }
         }
+        val match = checkMatch()
+        if ( match == 1 ) {
+            println("Player $playerA won\nGame over!")
+            continuation = false
+        } else if ( match == -1) {
+            println("Player $playerB won\nGame over!")
+            continuation = false
+        } else if ( match == 99) {
+            println("It is a draw\nGame over!")
+            continuation = false
+        }
 
         return continuation
+    }
+
+    fun putHand(turn: Int, column:Int) {
+        for(i in (row - 1) downTo 0) {
+            if (field[column - 1][i] == 0) {
+                field[column - 1][i] =
+                    if ( turn % 2 == 0) {
+                        1
+                    } else {
+                        -1
+                    }
+                printField()
+                this.turn++
+                return
+            }
+        }
+        println("Column $column is full")
     }
 
     fun getItsTurn(): Int{
@@ -55,10 +85,49 @@ class Con4() {
             val inputcol = input.toInt()
             if( inputcol in 1..this.col ) return inputcol
         } catch (ex: Exception) {
-            println("Invalid Input")
+            println("Incorrect Column number")
             return 0
         }
         println("The column number is out of range (1 - ${this.col})")
+        return 0
+    }
+
+    fun checkMatch(): Int {
+        for (i in 0 .. this.row) {
+            for(j in 0..this.col - 3) {
+                if(field[i][j] != 0 && field[i][j] == field[i][j+1] && field[i][j+1] == field[i][j+2] && field[i][j+2] == field[i][j+3]){
+                    return field[i][j]
+                }
+            }
+        }
+        for (i in 0 .. this.row - 3) {
+            for(j in 0..this.col) {
+                if(field[i][j] != 0 && field[i][j] == field[i+1][j] && field[i+1][j] == field[i+2][j] && field[i+2][j] == field[i+3][j]){
+                    return field[i][j]
+                }
+            }
+        }
+        for (i in 0..this.col -3) {
+            for(j in 0..this.row-3) {
+                if(field[i][j] != 0 && field[i][j] == field[i+1][j+1] && field[i+1][j+1] == field[i+2][j+2] && field[i+2][j+2] == field[i+3][j+3]){
+                    return field[i][j]
+                }
+            }
+        }
+        for (i in 0..this.col -3) {
+            for(j in 3..this.row) {
+                if(field[i][j] != 0 && field[i][j] == field[i+1][j-1] && field[i+1][j-1] == field[i+2][j-2] && field[i+2][j-2] == field[i+3][j-3]){
+                    return field[i][j]
+                }
+            }
+        }
+        var counter = 1
+        for (i in 0..this.row - 1) {
+            for (j in 0..this.col -1) {
+                if(field[i][j] == 0) counter = 0
+            }
+        }
+        if(counter != 0) return 99
         return 0
     }
 
@@ -98,8 +167,13 @@ class Con4() {
         for (i in 0..(this.row - 1)) {
             for (j in 0..this.col) {
                 print(
-                    if(j < this.col) {
-                        "| "
+                    if (j < this.col) {
+                        when(field[j][i]) {
+                            0 -> "| "
+                            1 -> "|o"
+                            -1 -> "|*"
+                            else -> "| "
+                        }
                     } else {
                         "|"
                     }
