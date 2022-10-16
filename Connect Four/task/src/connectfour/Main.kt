@@ -9,6 +9,11 @@ fun main() {
 class Con4() {
     var playerA = "playerA"
     var playerB = "playerB"
+    var scoreA = 0
+    var scoreB = 0
+    var restGames = 1
+    var gamesNum = 1
+    var singleMode = true
     var row = 6
     var col = 7
     var turn = 0
@@ -18,11 +23,22 @@ class Con4() {
         initialiser()
         println("$playerA vs $playerB")
         println("$row X $col board")
-        printField()
+        if (restGames == 1) {
+            println("Single game")
+        } else {
+            println("Total ${restGames} games")
+        }
+
     }
 
     fun matchController() {
-        while(match()){}
+        while (1 <= restGames) {
+            if (!singleMode) println("Game #${gamesNum}")
+            printField()
+            while (match()) {
+            }
+        }
+        println("Game over!")
     }
 
     fun match(): Boolean {
@@ -39,23 +55,53 @@ class Con4() {
             inputCol = getItsTurn()
             if (0 < inputCol) {
                 putHand(turn, inputCol)
+            } else if (inputCol < 0) {
+                //forcibly halt
+                continuation = false
+                restGames = 0
+                return continuation
             } else {
                 continuation = false
             }
         }
         val match = checkMatch()
         if ( match == 1 ) {
-            println("Player $playerA won\nGame over!")
+            println("Player $playerA won")
+            scoreA += 2
             continuation = false
         } else if ( match == -1) {
-            println("Player $playerB won\nGame over!")
+            println("Player $playerB won")
+            scoreB += 2
             continuation = false
         } else if ( match == 99) {
-            println("It is a draw\nGame over!")
+            println("It is a draw")
+            scoreA += 1
+            scoreB += 1
+            //turn = 0
             continuation = false
         }
 
+        if(!continuation && !singleMode){
+            println("Score\n$playerA: $scoreA $playerB: $scoreB")
+            nextGame()
+            resetField()
+        }
+        if(!continuation && singleMode){
+            nextGame()
+        }
         return continuation
+    }
+
+    fun nextGame() {
+        gamesNum++
+        restGames--
+    }
+    fun resetField() {
+        for (i in 0..row - 1) {
+            for (j in 0.. col -1) {
+                field[i][j] = 0
+            }
+        }
     }
 
     fun putHand(turn: Int, column:Int) {
@@ -78,7 +124,6 @@ class Con4() {
     fun getItsTurn(): Int{
         val input = readln()
         if(input == "end") {
-            println("Game over!")
             return -1
         }
         try {
@@ -137,6 +182,31 @@ class Con4() {
         println("Second player's name:")
         playerB = readln()
         while(setMap()){
+        }
+
+        var validGameCount = false
+        while(!validGameCount) {
+            println("Do you want to play single or multiple games?")
+            println("For a single game, input 1 or press Enter")
+            println("Input a number of games:")
+            val inputKey = readln()
+            if (inputKey == "") {
+                validGameCount = true
+            } else {
+                try {
+                    val inputGameNum = inputKey.toInt()
+                    if (1 <= inputGameNum) {
+                        restGames = inputGameNum
+                        if (1 < restGames) singleMode = false
+                        validGameCount = true
+                    } else {
+                        throw java.lang.Exception("invalid input except")
+                    }
+                } catch (ex: Exception) {
+                    //invalid numbers
+                    println("Invalid input")
+                }
+            }
         }
     }
 
